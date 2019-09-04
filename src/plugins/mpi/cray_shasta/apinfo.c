@@ -38,8 +38,8 @@ static int _get_nid(const char *hostname)
  * Empty lines and lines starting with # are ignored.
  * Newlines may be escaped with \.
  */
-void _multi_prog_parse(const stepd_step_rec_t *job, int *ncmds,
-		       uint32_t **tid_offsets)
+static void _multi_prog_parse(const stepd_step_rec_t *job, int *ncmds,
+			      uint32_t **tid_offsets)
 {
 	int i = 0, line_num = 0, rank_id = 0, num_cmds = 0, nranks = 0;
 	char *line = NULL, *local_data = NULL;
