@@ -332,7 +332,7 @@ rwfail:
 /*
  * Write the application information file
  */
-int create_apinfo(const stepd_step_rec_t *job)
+extern int create_apinfo(const stepd_step_rec_t *job)
 {
 	int fd = -1;
 	pals_header_t hdr;

@@ -77,6 +77,7 @@ const char plugin_name[] = "mpi Cray Shasta plugin";
 const char plugin_type[] = "mpi/cray_shasta";
 const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 
+/* GLOBAL vars */
 char *appdir = NULL; // Application-specific spool directory
 char *apinfo = NULL; // Application PMI file
 

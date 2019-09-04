@@ -120,6 +120,6 @@ typedef struct {
     char address[40];                 // Address of this NIC
 } pals_nic_t;
 
-int create_apinfo(const stepd_step_rec_t *job);
+extern int create_apinfo(const stepd_step_rec_t *job);
 
 #endif
