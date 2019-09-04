@@ -304,32 +304,6 @@ static int _open_apinfo(const stepd_step_rec_t *job)
 }
 
 /*
- * Write len bytes from buf to the given file.
- */
-static int _writen(int fd, void *buf, size_t len)
-{
-	ssize_t ret;
-	size_t nwrote = 0;
-
-	while (nwrote < len) {
-		ret = write(fd, buf + nwrote, len - nwrote);
-		if (ret < 0) {
-			if (errno == EINTR) {
-				continue;
-			} else {
-				error("mpi/cray_shasta: couldn't write %zu "
-				      "bytes to %s: %m",
-				      len - nwrote, apinfo);
-				return SLURM_ERROR;
-			}
-		} else {
-			nwrote += ret;
-		}
-	}
-	return SLURM_SUCCESS;
-}
-
-/*
  * Write the job's node list to the file
  */
 static int _write_pals_nodes(int fd, char *nodelist)
@@ -347,13 +321,9 @@ static int _write_pals_nodes(int fd, char *nodelist)
 	while ((host = hostlist_shift(hl)) != NULL) {
 		snprintf(node.hostname, sizeof(node.hostname), host);
 		node.nid = _get_nid(host);
-
-		if (_writen(fd, &node, sizeof(pals_node_t)) == SLURM_ERROR) {
-			hostlist_destroy(hl);
-			return SLURM_ERROR;
-		}
+		safe_write(fd, &node, sizeof(pals_node_t));
 	}
-
+rwfail:
 	hostlist_destroy(hl);
 	return SLURM_SUCCESS;
 }
@@ -440,12 +410,13 @@ int create_apinfo(const stepd_step_rec_t *job)
 	}
 
 	// Write info
-	if (_writen(fd, &hdr, sizeof(pals_header_t)) == SLURM_ERROR ||
-	    _writen(fd, cmds, hdr.ncmds * sizeof(pals_cmd_t)) == SLURM_ERROR ||
-	    _writen(fd, pes, hdr.npes * sizeof(pals_pe_t)) == SLURM_ERROR ||
-	    _write_pals_nodes(fd, nodelist) == SLURM_ERROR) {
+	safe_write(fd, &hdr, sizeof(pals_header_t));
+	safe_write(fd, cmds, (hdr.ncmds * sizeof(pals_cmd_t)));
+	safe_write(fd, pes, (hdr.npes * sizeof(pals_pe_t)));
+
+	if (_write_pals_nodes(fd, nodelist) == SLURM_ERROR)
 		goto error;
-	}
+
 	// TODO: Write communication profiles
 	// TODO write nics
 
@@ -466,6 +437,7 @@ int create_apinfo(const stepd_step_rec_t *job)
 	close(fd);
 	return SLURM_SUCCESS;
 
+rwfail:
 error:
 	if (job->flags & LAUNCH_MULTI_PROG) {
 		xfree(tid_offsets);
