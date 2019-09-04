@@ -40,84 +40,8 @@
 #include "src/slurmd/slurmd/slurmd.h"
 #include "src/slurmd/slurmstepd/slurmstepd_job.h"
 
-// Name of the directory to store Cray MPI data
-#define MPI_CRAY_DIR "mpi_cray_shasta"
-
 extern char *appdir;        // Application-specific spool directory
 extern char *apinfo;        // Application PMI file
-
-// Environment variables available for applications
-#define PALS_APID_ENV "PALS_APID"
-#define PALS_APINFO_ENV "PALS_APINFO"
-#define PALS_RANKID_ENV "PALS_RANKID"
-#define PALS_NODEID_ENV "PALS_NODEID"
-#define PALS_SPOOL_DIR_ENV "PALS_SPOOL_DIR"
-
-// Application file format version
-#define PALS_APINFO_VERSION 1
-
-// File header structure
-typedef struct {
-    int version;
-    size_t total_size;
-    size_t comm_profile_size;
-    size_t comm_profile_offset;
-    int ncomm_profiles;
-    size_t cmd_size;
-    size_t cmd_offset;
-    int ncmds;
-    size_t pe_size;
-    size_t pe_offset;
-    int npes;
-    size_t node_size;
-    size_t node_offset;
-    int nnodes;
-    size_t nic_size;
-    size_t nic_offset;
-    int nnics;
-} pals_header_t;
-
-// Network communication profile structure
-typedef struct {
-    char tokenid[40];    // Token UUID
-    int vni;             // VNI associated with this token
-    int vlan;            // VLAN associated with this token
-    int traffic_classes; // Bitmap of allowed traffic classes
-} pals_comm_profile_t;
-
-// MPMD command information structure
-typedef struct {
-    int npes;         // Number of PEs in this command
-    int pes_per_node; // Number of PEs per node
-    int cpus_per_pe;  // Number of CPUs per PE
-} pals_cmd_t;
-
-// PE (i.e. task) information structure
-typedef struct {
-    int localidx; // Node-local PE index
-    int cmdidx;   // Command index for this PE
-    int nodeidx;  // Node index this PE is running on
-} pals_pe_t;
-
-// Node information structure
-typedef struct {
-    int nid;           // Node ID
-    char hostname[64]; // Node hostname
-} pals_node_t;
-
-// NIC address type
-typedef enum {
-    PALS_ADDR_IPV4,
-    PALS_ADDR_IPV6,
-    PALS_ADDR_MAC
-} pals_address_type_t;
-
-// NIC information structure
-typedef struct {
-    int nodeidx;                      // Node index this NIC belongs to
-    pals_address_type_t address_type; // Address type for this NIC
-    char address[40];                 // Address of this NIC
-} pals_nic_t;
 
 extern int create_apinfo(const stepd_step_rec_t *job);
 
