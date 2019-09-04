@@ -321,6 +321,7 @@ static int _write_pals_nodes(int fd, char *nodelist)
 	while ((host = hostlist_shift(hl)) != NULL) {
 		snprintf(node.hostname, sizeof(node.hostname), host);
 		node.nid = _get_nid(host);
+		free(host);
 		safe_write(fd, &node, sizeof(pals_node_t));
 	}
 rwfail:
