@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  mpi_cray_shasta.h - Cray Shasta MPI plugin header file
+ *  apinfo.h - Cray Shasta PMI apinfo file creation header file
  *****************************************************************************
  *  Copyright 2019 Cray Inc. All Rights Reserved.
  *  Written by David Gloe <dgloe@cray.com>
@@ -34,8 +34,8 @@
  *  51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA.
 \*****************************************************************************/
 
-#ifndef _MPI_CRAY_H
-#define _MPI_CRAY_H
+#ifndef _MPI_CRAY_SHASTA_APINFO_H
+#define _MPI_CRAY_SHASTA_APINFO_H
 
 #include "src/slurmd/slurmd/slurmd.h"
 #include "src/slurmd/slurmstepd/slurmstepd_job.h"

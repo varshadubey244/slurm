@@ -10,7 +10,7 @@
 
 #include "src/common/xstring.h"
 
-#include "mpi_cray_shasta.h"
+#include "apinfo.h"
 
 /*
  * Get a NID from a hostname, in format nidXXXXXX.

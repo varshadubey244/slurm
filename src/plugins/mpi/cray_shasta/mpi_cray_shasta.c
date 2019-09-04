@@ -47,7 +47,7 @@
 #include "src/common/slurm_mpi.h"
 #include "src/slurmd/slurmstepd/slurmstepd_job.h"
 
-#include "mpi_cray_shasta.h"
+#include "apinfo.h"
 
 /*
  * These variables are required by the generic plugin interface.  If they
