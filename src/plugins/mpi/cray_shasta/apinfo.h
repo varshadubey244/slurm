@@ -43,7 +43,6 @@
 // Name of the directory to store Cray MPI data
 #define MPI_CRAY_DIR "mpi_cray_shasta"
 
-extern slurmd_conf_t *conf; // slurmd configuration
 extern char *appdir;        // Application-specific spool directory
 extern char *apinfo;        // Application PMI file
 
