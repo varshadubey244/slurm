@@ -474,27 +474,27 @@ extern int create_apinfo(const stepd_step_rec_t *job)
 	// Make sure we've got everything
 	if (ntasks <= 0) {
 		error("mpi/cray_shasta: no tasks found");
-		goto error;
+		goto rwfail;
 	}
 	if (ncmds <= 0) {
 		error("mpi/cray_shasta: no cmds found");
-		goto error;
+		goto rwfail;
 	}
 	if (nnodes <= 0) {
 		error("mpi/cray_shasta: no nodes found");
-		goto error;
+		goto rwfail;
 	}
 	if (task_cnts == NULL) {
 		error("mpi/cray_shasta: no per-node task counts");
-		goto error;
+		goto rwfail;
 	}
 	if (tids == NULL) {
 		error("mpi/cray_shasta: no task IDs found");
-		goto error;
+		goto rwfail;
 	}
 	if (nodelist == NULL) {
 		error("mpi/cray_shasta: no nodelist found");
-		goto error;
+		goto rwfail;
 	}
 
 	// Get information to write
@@ -505,7 +505,7 @@ extern int create_apinfo(const stepd_step_rec_t *job)
 	// Create the file
 	fd = _open_apinfo(job);
 	if (fd == -1) {
-		goto error;
+		goto rwfail;
 	}
 
 	// Write info
@@ -514,7 +514,7 @@ extern int create_apinfo(const stepd_step_rec_t *job)
 	safe_write(fd, pes, (hdr.npes * sizeof(pals_pe_t)));
 
 	if (_write_pals_nodes(fd, nodelist) == SLURM_ERROR)
-		goto error;
+		goto rwfail;
 
 	// TODO: Write communication profiles
 	// TODO write nics
@@ -522,7 +522,7 @@ extern int create_apinfo(const stepd_step_rec_t *job)
 	// Flush changes to disk
 	if (fsync(fd) == -1) {
 		error("mpi/cray_shasta: Couldn't sync %s to disk: %m", apinfo);
-		goto error;
+		goto rwfail;
 	}
 
 	debug("mpi/cray_shasta: Wrote apinfo file %s", apinfo);
@@ -537,7 +537,6 @@ extern int create_apinfo(const stepd_step_rec_t *job)
 	return SLURM_SUCCESS;
 
 rwfail:
-error:
 	if (job->flags & LAUNCH_MULTI_PROG) {
 		xfree(tid_offsets);
 	}
