@@ -132,18 +132,19 @@ static int _create_app_dir(const stepd_step_rec_t *job)
 
 	// Create the directory
 	if (mkdir(appdir, 0700) == -1 && errno != EEXIST) {
-		error("mpi/cray_shasta: Couldn't create directory %s: %m", appdir);
+		error("%s: Couldn't create directory %s: %m",
+		      plugin_type, appdir);
 		goto error;
 	}
 
 	// Change directory owner
 	if (chown(appdir, job->uid, job->gid) == -1) {
-		error("mpi/cray_shasta: Couldn't change directory %s owner: %m",
-		      appdir);
+		error("%s: Couldn't change directory %s owner: %m",
+		      plugin_type, appdir);
 		goto error;
 	}
 
-	debug("mpi/cray_shasta: Created application directory %s", appdir);
+	debug("%s: Created application directory %s", plugin_type, appdir);
 	return SLURM_SUCCESS;
 
 error:
@@ -171,7 +172,8 @@ static void _set_pmi_port(char ***env)
 	errno = 0;
 	pmi_port = strtoul(resv_ports, &endp, 10);
 	if (errno != 0 || pmi_port > 65535 || (*endp != '-' && *endp != '\0')) {
-		error("mpi/cray_shasta: Couldn't parse reserved ports %s", resv_ports);
+		error("%s: Couldn't parse reserved ports %s",
+		      plugin_type, resv_ports);
 		return;
 	}
 
@@ -186,7 +188,7 @@ static int _is_dir(char *path)
 	struct stat stat_buf;
 	int rc;
 	if (0 > (rc = stat(path, &stat_buf))) {
-		error("mpi/cray_shasta: Cannot stat %s: %m", path);
+		error("%s: Cannot stat %s: %m", plugin_type, path);
 		return rc;
 	} else if (!S_ISDIR(stat_buf.st_mode)) {
 		return 0;
@@ -204,7 +206,7 @@ static int _rmdir_recursive(char *path)
 	struct dirent *ent;
 
 	if ((dp = opendir(path)) == NULL) {
-		error("mpi/cray_shasta: Can't open directory %s: %m", path);
+		error("%s: Can't open directory %s: %m", plugin_type, path);
 		return SLURM_ERROR;
 	}
 
@@ -219,18 +221,19 @@ static int _rmdir_recursive(char *path)
 		if (_is_dir(nested_path)) {
 			_rmdir_recursive(nested_path);
 		} else {
-			debug("mpi/cray_shasta: Removed file %s", nested_path);
+			debug("%s: Removed file %s", plugin_type, nested_path);
 			unlink(nested_path);
 		}
 	}
 	closedir(dp);
 
 	if (rmdir(path) == -1) {
-		error("mpi/cray_shasta: Can't remove directory %s: %m", path);
+		error("%s: Can't remove directory %s: %m",
+		      plugin_type, path);
 		return SLURM_ERROR;
 	}
 
-	debug("mpi/cray_shasta: Removed directory %s", path);
+	debug("%s: Removed directory %s", plugin_type, path);
 	return SLURM_SUCCESS;
 }
 
