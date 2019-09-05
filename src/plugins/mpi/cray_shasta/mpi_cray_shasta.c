@@ -91,17 +91,19 @@ const uint32_t plugin_version = SLURM_VERSION_NUMBER;
 char *appdir = NULL; // Application-specific spool directory
 char *apinfo = NULL; // Application PMI file
 
+static char *spooldir = NULL;
+
 /*
  * Create the Cray MPI directory under the slurmd spool directory
  */
 static int _create_mpi_dir(void)
 {
-	char *spooldir = NULL;
 	char *mpidir = NULL;
 	int rc = SLURM_SUCCESS;
 
+	xassert(spooldir);
+
 	// TODO: pass in node_name parameter
-	spooldir = slurm_get_slurmd_spooldir(NULL);
 	mpidir = xstrdup_printf("%s/%s", spooldir, MPI_CRAY_DIR);
 	if (mkdir(mpidir, 0755) == -1 && errno != EEXIST) {
 		error("%s: Couldn't create Cray MPI directory %s: %m",
@@ -109,7 +111,6 @@ static int _create_mpi_dir(void)
 		rc = SLURM_ERROR;
 	}
 	xfree(mpidir);
-	xfree(spooldir);
 
 	return rc;
 }
@@ -120,7 +121,8 @@ static int _create_mpi_dir(void)
 static int _create_app_dir(const stepd_step_rec_t *job)
 {
 	// TODO: pass in node_name parameter
-	char *spooldir = slurm_get_slurmd_spooldir(NULL);
+
+	xassert(spooldir);
 
 	xfree(appdir);
 	// Format the directory name
@@ -147,7 +149,6 @@ static int _create_app_dir(const stepd_step_rec_t *job)
 error:
 	rmdir(appdir);
 	xfree(appdir);
-	xfree(spooldir);
 	appdir = NULL;
 	return SLURM_ERROR;
 }
@@ -274,10 +275,18 @@ extern int p_mpi_hook_client_fini(mpi_plugin_client_state_t *state)
 	return SLURM_SUCCESS;
 }
 
+extern int init(void)
+{
+	xfree(spooldir);
+	spooldir = slurm_get_slurmd_spooldir(NULL);
+
+	return SLURM_SUCCESS;
+}
+
 /*
  * Clean up the application
  */
-extern int fini()
+extern int fini(void)
 {
 	// Remove application spool directory
 	if (appdir != NULL) {
@@ -287,5 +296,8 @@ extern int fini()
 	// Free allocated storage
 	xfree(appdir);
 	xfree(apinfo);
+
+	xfree(spooldir);
+
 	return SLURM_SUCCESS;
 }
