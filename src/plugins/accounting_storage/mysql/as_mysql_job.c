@@ -755,7 +755,11 @@ extern List as_mysql_modify_job(mysql_conn_t *mysql_conn, uint32_t uid,
 		xstrfmtcat(vals, ", system_comment='%s'",
 			   job->system_comment);
 
+	if (job->wckey)
+		xstrfmtcat(vals, ", wckey='%s'", job->wckey);
+	else /* If we aren't changing wckey's we are asking for specific jobs */
 		job_cond->flags |= JOBCOND_FLAG_USAGE_AS_SUBMIT;
+
 	if (!vals) {
 		errno = SLURM_NO_CHANGE_IN_DATA;
 		error("No change specified for job modification");
@@ -803,6 +807,22 @@ extern List as_mysql_modify_job(mysql_conn_t *mysql_conn, uint32_t uid,
 			ret_list = list_create(slurm_destroy_char);
 		list_append(ret_list, object);
 
+		/*
+		 * Grab the wckey id to update the job now.
+		 */
+		if (job->wckey) {
+			uint32_t wckeyid = _get_wckeyid(mysql_conn,
+							&job->wckey,
+							job_rec->uid,
+							job_rec->cluster,
+							job_rec->associd);
+			if (!wckeyid) {
+				rc = SLURM_ERROR;
+				break;
+			}
+			vals_mod = xstrdup_printf("%s, id_wckey='%u'",
+						  vals, wckeyid);
+		} else
 			vals_mod = vals;
 
 		rc = modify_common(mysql_conn, DBD_MODIFY_JOB, now, user_name,
@@ -810,6 +830,8 @@ extern List as_mysql_modify_job(mysql_conn_t *mysql_conn, uint32_t uid,
 				   job_rec->cluster);
 		xfree(cond_char);
 
+		if (job->wckey)
+			xfree(vals_mod);
 
 		if (rc != SLURM_SUCCESS)
 			break;
