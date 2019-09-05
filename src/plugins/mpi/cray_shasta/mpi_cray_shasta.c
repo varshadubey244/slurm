@@ -94,7 +94,7 @@ char *apinfo = NULL; // Application PMI file
 /*
  * Create the Cray MPI directory under the slurmd spool directory
  */
-int _create_mpi_dir(void)
+static int _create_mpi_dir(void)
 {
 	char *spooldir = NULL;
 	char *mpidir = NULL;
@@ -117,7 +117,7 @@ int _create_mpi_dir(void)
 /*
  * Create the application-specific directory under the Cray MPI directory
  */
-int _create_app_dir(const stepd_step_rec_t *job)
+static int _create_app_dir(const stepd_step_rec_t *job)
 {
 	// TODO: pass in node_name parameter
 	char *spooldir = slurm_get_slurmd_spooldir(NULL);
@@ -155,7 +155,7 @@ error:
 /*
  * Set the PMI port to use in the application's environment
  */
-void _set_pmi_port(char ***env)
+static void _set_pmi_port(char ***env)
 {
 	char *resv_ports = NULL;
 	char *endp = NULL;
@@ -196,7 +196,7 @@ static int _is_dir(char *path)
 /*
  * Recursively remove a directory
  */
-int _rmdir_recursive(char *path)
+static int _rmdir_recursive(char *path)
 {
 	char nested_path[PATH_MAX];
 	DIR *dp;
@@ -233,7 +233,8 @@ int _rmdir_recursive(char *path)
 	return SLURM_SUCCESS;
 }
 
-int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env)
+extern int p_mpi_hook_slurmstepd_prefork(
+	const stepd_step_rec_t *job, char ***env)
 {
 	// Set up spool directory and apinfo
 	if (_create_mpi_dir() == SLURM_ERROR ||
@@ -245,7 +246,8 @@ int p_mpi_hook_slurmstepd_prefork(const stepd_step_rec_t *job, char ***env)
 	return SLURM_SUCCESS;
 }
 
-int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env)
+extern int p_mpi_hook_slurmstepd_task(
+	const mpi_plugin_task_info_t *job, char ***env)
 {
 	// Set environment variables
 	env_array_overwrite_fmt(env, PALS_APID_ENV, "%u.%u", job->jobid,
@@ -260,14 +262,14 @@ int p_mpi_hook_slurmstepd_task(const mpi_plugin_task_info_t *job, char ***env)
 	return SLURM_SUCCESS;
 }
 
-mpi_plugin_client_state_t *
-p_mpi_hook_client_prelaunch(const mpi_plugin_client_info_t *job, char ***env)
+extern mpi_plugin_client_state_t *p_mpi_hook_client_prelaunch(
+	const mpi_plugin_client_info_t *job, char ***env)
 {
 	/* only return NULL on error */
 	return (void *)0xdeadbeef;
 }
 
-int p_mpi_hook_client_fini(mpi_plugin_client_state_t *state)
+extern int p_mpi_hook_client_fini(mpi_plugin_client_state_t *state)
 {
 	return SLURM_SUCCESS;
 }
