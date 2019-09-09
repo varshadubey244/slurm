@@ -794,13 +794,14 @@ extern List as_mysql_modify_job(mysql_conn_t *mysql_conn, uint32_t uid,
 
 	job_list = as_mysql_jobacct_process_get_jobs(mysql_conn, uid, job_cond);
 
-	if (!job_list) {
+	if (!job_list || !list_count(job_list)) {
 		errno = SLURM_NO_CHANGE_IN_DATA;
 		if (debug_flags & DEBUG_FLAG_DB_JOB)
 			DB_DEBUG(mysql_conn->conn,
 				 "%s: Job(s) not found\n",
 				 __func__);
 		xfree(vals);
+		FREE_NULL_LIST(job_list);
 		return NULL;
 	}
 
