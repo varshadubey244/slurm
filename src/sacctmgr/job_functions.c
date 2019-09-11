@@ -90,6 +90,16 @@ static int _set_cond(int *start, int argc, char **argv,
 				exit_code = 1;
 			} else
 				set = 1;
+		} else if (!xstrncasecmp(argv[i], "EndTime",
+					 MAX(command_len, 1))) {
+			job_cond->usage_end = parse_time(argv[i]+end, 1);
+			if (errno == ESLURM_INVALID_TIME_VALUE)
+				exit(1);
+		} else if (!xstrncasecmp(argv[i], "StartTime",
+					 MAX(command_len, 1))) {
+			job_cond->usage_start = parse_time(argv[i]+end, 1);
+			if (errno == ESLURM_INVALID_TIME_VALUE)
+				exit(1);
 		} else if (!xstrncasecmp(argv[i], "WCkeys",
 					 MAX(command_len, 1))) {
 			if (!job_cond->wckey_list)
@@ -105,7 +115,6 @@ static int _set_cond(int *start, int argc, char **argv,
 					list_create(slurm_destroy_char);
 			slurm_addto_id_char_list(job_cond->userid_list,
 						 argv[i]+end, 0);
-			set = 1;
 		} else {
 			exit_code = 1;
 			fprintf(stderr, " Unknown condition: %s\n"
