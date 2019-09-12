@@ -1556,7 +1556,6 @@ static void _update_system_comment(struct job_record *job_ptr, char *operation,
 		list_append(job_cond.step_list, &selected_step);
 
 		job_cond.flags = JOBCOND_FLAG_NO_WAIT |
-			JOBCOND_FLAG_USAGE_AS_SUBMIT |
 			JOBCOND_FLAG_DBD_UID |
 			JOBCOND_FLAG_NO_DEFAULT_USAGE;
 
