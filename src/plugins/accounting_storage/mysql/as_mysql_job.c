@@ -780,8 +780,6 @@ extern List as_mysql_modify_job(mysql_conn_t *mysql_conn, uint32_t uid,
 
 	if (job->wckey)
 		xstrfmtcat(vals, ", wckey='%s'", job->wckey);
-	else /* If we aren't changing wckey's we are asking for specific jobs */
-		job_cond->flags |= JOBCOND_FLAG_USAGE_AS_SUBMIT;
 
 	if (!vals) {
 		errno = SLURM_NO_CHANGE_IN_DATA;
