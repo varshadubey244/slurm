@@ -1,3 +1,3 @@
 #Makefile for 4dtorus plugins
 
-SUBDIRS = 
+SUBDIRS = topology_4d_torus.c
